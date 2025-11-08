@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { Plus } from 'lucide-react';
 import TaskCard from './TaskCard';
 
@@ -10,38 +10,38 @@ const columns = [
   { key: 'Completed', title: 'Completed' },
 ];
 
-const ColumnHeader = ({ title, count, accent }) => (
+const badgeClassFor = (key) => {
+  switch (key) {
+    case 'Backlog':
+      return 'bg-slate-100 text-slate-700';
+    case 'To Do':
+      return 'bg-sky-100 text-sky-700';
+    case 'In Progress':
+      return 'bg-amber-100 text-amber-700';
+    case 'Under Review':
+      return 'bg-violet-100 text-violet-700';
+    case 'Completed':
+      return 'bg-emerald-100 text-emerald-700';
+    default:
+      return 'bg-slate-100 text-slate-700';
+  }
+};
+
+const ColumnHeader = ({ title, count, badgeClass }) => (
   <div className="px-3 pt-3 pb-2">
     <div className="flex items-center justify-between">
       <h3 className="text-sm font-semibold text-slate-700 tracking-wide">{title}</h3>
-      <span className={`text-xs px-2 py-0.5 rounded-full bg-${accent}-100 text-${accent}-700`}>{count}</span>
+      <span className={`text-xs px-2 py-0.5 rounded-full ${badgeClass}`}>{count}</span>
     </div>
   </div>
 );
 
-const accentFor = (key) => {
-  switch (key) {
-    case 'Backlog':
-      return 'slate';
-    case 'To Do':
-      return 'sky';
-    case 'In Progress':
-      return 'amber';
-    case 'Under Review':
-      return 'violet';
-    case 'Completed':
-      return 'emerald';
-    default:
-      return 'slate';
-  }
-};
-
-const KanbanBoard = ({ tasks, compact, onMove }) => {
+const KanbanBoard = ({ tasks, compact }) => {
   const grouped = useMemo(() => {
-    const g = { 'Backlog': [], 'To Do': [], 'In Progress': [], 'Under Review': [], 'Completed': [] };
+    const g = { Backlog: [], 'To Do': [], 'In Progress': [], 'Under Review': [], Completed: [] };
     tasks.forEach((t) => {
       if (g[t.status]) g[t.status].push(t);
-      else g['Backlog'].push(t);
+      else g.Backlog.push(t);
     });
     return g;
   }, [tasks]);
@@ -51,7 +51,7 @@ const KanbanBoard = ({ tasks, compact, onMove }) => {
       <div className="min-w-[1100px] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 p-4 max-w-7xl mx-auto">
         {columns.map((col) => (
           <div key={col.key} className="bg-white/80 backdrop-blur rounded-xl border border-slate-200 shadow-sm flex flex-col min-h-[60vh]">
-            <ColumnHeader title={col.title} count={grouped[col.key]?.length || 0} accent={accentFor(col.key)} />
+            <ColumnHeader title={col.title} count={grouped[col.key]?.length || 0} badgeClass={badgeClassFor(col.key)} />
             <div className="px-3 pb-3 space-y-3 flex-1 overflow-auto">
               {grouped[col.key]?.map((task) => (
                 <TaskCard key={task.id} task={task} compact={compact} />
